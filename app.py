@@ -266,10 +266,7 @@ if st.session_state["encrypted"]:
             "Parameter b": key["b"]
         })
 
-    st.dataframe(
-        key_table,
-        hide_index=True,
-        use_container_width=True
+    
     )
 
     # --------------------------------------------------
