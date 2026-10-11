@@ -267,7 +267,7 @@ if st.session_state["encrypted"]:
         })
 
     
-    )
+    
 
     # --------------------------------------------------
     # DOWNLOAD DATA
