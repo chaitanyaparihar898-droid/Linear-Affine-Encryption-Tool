@@ -2,153 +2,255 @@ import streamlit as st
 import json
 import random
 
+# --------------------------------------------------
+# PAGE SETTINGS
+# --------------------------------------------------
+
 st.set_page_config(
     page_title="Linear Affine Encryption Tool",
     page_icon="🔐",
     layout="centered"
 )
 
-# ---------- DESIGN ----------
+# --------------------------------------------------
+# CUSTOM DESIGN
+# --------------------------------------------------
+
 st.markdown("""
 <style>
 .stApp {
     background-color: #101214;
     color: #eeeeee;
 }
+
 h1, h2, h3, p, label {
     color: #eeeeee !important;
 }
+
 .stTextArea textarea {
     background-color: #191d20;
     color: #eeeeee;
     border: 1px solid #343a40;
     border-radius: 8px;
 }
+
 .stButton > button {
     background-color: #20272b;
     color: #ffffff;
     border: 1px solid #41494f;
     border-radius: 7px;
     width: 100%;
+    min-height: 42px;
 }
+
 .stButton > button:hover {
     border-color: #20c997;
     color: #20c997;
 }
+
 .ciphertext {
-    background: #191d20;
+    background-color: #191d20;
     border: 1px solid #343a40;
     border-radius: 8px;
-    padding: 15px;
+    padding: 16px;
     color: #55d6e8;
     overflow-wrap: anywhere;
+    font-size: 16px;
 }
-.success {
-    color: #20c997;
+
+div[data-testid="stMetric"] {
+    background-color: transparent;
+}
+
+div[data-testid="stMetricValue"] {
+    color: #eeeeee;
+}
+
+hr {
+    border-color: #343a40;
 }
 </style>
 """, unsafe_allow_html=True)
 
-# ---------- SESSION DATA ----------
-if "encrypted" not in st.session_state:
-    st.session_state.encrypted = False
-    st.session_state.ciphertext = ""
-    st.session_state.keys = []
-    st.session_state.original = ""
-    st.session_state.decrypted = None
+# --------------------------------------------------
+# SESSION STATE
+# --------------------------------------------------
 
-# ---------- TITLE ----------
+if "encrypted" not in st.session_state:
+    st.session_state["encrypted"] = False
+    st.session_state["ciphertext"] = ""
+    st.session_state["keys"] = []
+    st.session_state["original"] = ""
+    st.session_state["decrypted"] = None
+
+# --------------------------------------------------
+# TITLE
+# --------------------------------------------------
+
 st.title("Linear Affine Encryption Tool")
-st.caption("A mathematical model for text encryption and decryption.")
+
+st.caption(
+    "A mathematical model for text encryption and decryption."
+)
 
 st.markdown("---")
 
-# ---------- INPUT ----------
+# --------------------------------------------------
+# MESSAGE INPUT
+# --------------------------------------------------
+
 st.subheader("Enter your message")
 
 message = st.text_area(
     "Message",
     placeholder="Type your message here...",
     height=120,
-    label_visibility="collapsed"
+    label_visibility="collapsed",
+    key="message_input"
 )
 
 if st.button("Encrypt Message", type="primary"):
+
     if not message:
         st.warning("Please enter a message first.")
+
     else:
         encrypted_values = []
-        keys = []
+        encryption_keys = []
 
-        for char in message:
+        for character in message:
+            # Generate numerical parameters
             a = random.randint(2, 9)
             b = random.randint(1, 9)
 
-            value = a * ord(char) + b
-            encrypted_values.append(value)
-            keys.append({"a": a, "b": b})
+            # Convert character to its Unicode code point
+            x = ord(character)
 
-        st.session_state.original = message
-        st.session_state.ciphertext = " ".join(map(str, encrypted_values))
-        st.session_state.keys = keys
-        st.session_state.encrypted = True
-        st.session_state.decrypted = None
+            # Encryption equation: y = ax + b
+            y = a * x + b
 
-# ---------- ENCRYPTION RESULT ----------
-if st.session_state.encrypted:
+            encrypted_values.append(y)
+
+            encryption_keys.append({
+                "a": a,
+                "b": b
+            })
+
+        # Save results
+        st.session_state["original"] = message
+
+        st.session_state["ciphertext"] = " ".join(
+            str(value) for value in encrypted_values
+        )
+
+        st.session_state["keys"] = encryption_keys
+        st.session_state["encrypted"] = True
+        st.session_state["decrypted"] = None
+
+# --------------------------------------------------
+# ENCRYPTION RESULT
+# --------------------------------------------------
+
+if st.session_state["encrypted"]:
+
     st.markdown("### Encrypted Message")
+
     st.markdown(
-        f'<div class="ciphertext">{st.session_state.ciphertext}</div>',
+        f'<div class="ciphertext">'
+        f'{st.session_state["ciphertext"]}'
+        f'</div>',
         unsafe_allow_html=True
     )
 
-    st.markdown("")
+    st.write("")
 
+    # Three horizontal statistics
     col1, col2, col3 = st.columns(3)
+
     with col1:
-        st.metric("Characters", len(st.session_state.original))
+        st.metric(
+            "Characters",
+            len(st.session_state["original"])
+        )
+
     with col2:
-        st.metric("Cipher Values", len(st.session_state.keys))
+        st.metric(
+            "Cipher Values",
+            len(st.session_state["keys"])
+        )
+
     with col3:
-        st.metric("Ciphertext Length", len(st.session_state.ciphertext))
+        st.metric(
+            "Ciphertext Length",
+            len(st.session_state["ciphertext"])
+        )
 
     st.markdown("---")
 
-    # ---------- DECRYPTION ----------
+    # --------------------------------------------------
+    # DECRYPTION
+    # --------------------------------------------------
+
     st.subheader("Decryption")
 
     if st.button("Decrypt Message"):
-        decrypted_chars = []
+
+        decrypted_characters = []
+
+        encrypted_numbers = [
+            int(value)
+            for value in st.session_state["ciphertext"].split()
+        ]
 
         for value, key in zip(
-            map(int, st.session_state.ciphertext.split()),
-            st.session_state.keys
+            encrypted_numbers,
+            st.session_state["keys"]
         ):
-            char_code = (value - key["b"]) // key["a"]
-            decrypted_chars.append(chr(char_code))
+            a = key["a"]
+            b = key["b"]
 
-        st.session_state.decrypted = "".join(decrypted_chars)
+            # Decryption equation: x = (y - b) / a
+            x = (value - b) // a
 
-    if st.session_state.decrypted is not None:
-        st.success("Message decrypted successfully!")
-        st.text_area(
-            "Decrypted message",
-            value=st.session_state.decrypted,
-            height=100,
-            disabled=True
+            decrypted_characters.append(chr(x))
+
+        st.session_state["decrypted"] = "".join(
+            decrypted_characters
         )
 
-    # ---------- KEYS ----------
-    with st.expander("View Encryption Keys"):
-        st.caption("Each character has its own values of a and b.")
-        st.json(st.session_state.keys)
+    if st.session_state["decrypted"] is not None:
 
-    # ---------- DOWNLOAD ----------
+        st.success("Message decrypted successfully!")
+
+        st.text_area(
+            "Decrypted message",
+            value=st.session_state["decrypted"],
+            height=100,
+            disabled=True,
+            key="decrypted_output"
+        )
+
+    # --------------------------------------------------
+    # ENCRYPTION KEYS
+    # --------------------------------------------------
+
+    with st.expander("View Encryption Keys"):
+
+        st.caption(
+            "Each character has its own values of a and b."
+        )
+
+        st.json(st.session_state["keys"])
+
+    # --------------------------------------------------
+    # DOWNLOAD DATA
+    # --------------------------------------------------
+
     download_data = {
-        "original_message": st.session_state.original,
-        "encrypted_message": st.session_state.ciphertext,
-        "keys": st.session_state.keys,
-        "decrypted_message": st.session_state.decrypted
+        "original_message": st.session_state["original"],
+        "encrypted_message": st.session_state["ciphertext"],
+        "encryption_keys": st.session_state["keys"],
+        "decrypted_message": st.session_state["decrypted"]
     }
 
     st.download_button(
@@ -158,19 +260,33 @@ if st.session_state.encrypted:
         mime="application/json"
     )
 
-    # ---------- MATHEMATICAL MODEL ----------
+    # --------------------------------------------------
+    # MATHEMATICAL MODEL
+    # --------------------------------------------------
+
     st.markdown("---")
+
     st.subheader("Mathematical Model")
 
-    st.latex(r"E(x) = ax + b")
-    st.latex(r"D(y) = \frac{y-b}{a}")
+    st.write("Encryption equation:")
+
+    st.latex(r"y = ax + b")
+
+    st.write("Decryption equation:")
+
+    st.latex(r"x = \frac{y-b}{a}")
 
     st.write(
-        "Here, x is the character's ASCII/Unicode code point, "
-        "a and b are numerical parameters, and y is the encrypted value."
+        """
+        **Where:**
+
+        - **x** = numerical code of the original character
+        - **a, b** = numerical encryption parameters
+        - **y** = encrypted numerical value
+        """
     )
 
     st.caption(
-        "Educational demonstration only. This custom method is not "
-        "secure enough for protecting real confidential information."
+        "Educational demonstration only. This custom method "
+        "is not suitable for protecting confidential information."
     )
