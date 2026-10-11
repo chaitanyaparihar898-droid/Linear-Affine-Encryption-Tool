@@ -18,38 +18,28 @@ st.set_page_config(
 
 st.markdown("""
 <style>
-
-/* Main background and text */
 .stApp {
     background-color: #101214;
     color: #eeeeee;
 }
 
-/* Headings and labels */
 h1, h2, h3, p, label {
     color: #eeeeee !important;
 }
 
-/* Text input area */
 .stTextArea textarea {
-    background-color: #191d20 !important;
-    color: #eeeeee !important;
-    border: 1px solid #41494f;
+    background-color: #191d20;
+    color: #eeeeee;
+    border: 1px solid #343a40;
     border-radius: 8px;
 }
 
-/* Placeholder text */
-.stTextArea textarea::placeholder {
-    color: #a0a7ad !important;
-    opacity: 1;
-}
-
-/* Buttons */
 .stButton > button {
     background-color: #20272b;
     color: #ffffff;
     border: 1px solid #41494f;
     border-radius: 7px;
+    width: 100%;
     min-height: 42px;
 }
 
@@ -58,15 +48,6 @@ h1, h2, h3, p, label {
     color: #20c997;
 }
 
-/* Download button */
-.stDownloadButton > button {
-    background-color: #20272b;
-    color: #ffffff;
-    border: 1px solid #41494f;
-    border-radius: 7px;
-}
-
-/* Encrypted message */
 .ciphertext {
     background-color: #191d20;
     border: 1px solid #343a40;
@@ -77,29 +58,22 @@ h1, h2, h3, p, label {
     font-size: 16px;
 }
 
-/* Statistics */
+div[data-testid="stMetric"] {
+    background-color: transparent;
+}
+
 div[data-testid="stMetricValue"] {
     color: #eeeeee;
 }
 
-/* Expandable sections */
-div[data-testid="stExpander"] {
-    background-color: #101214;
-    border-color: #343a40;
-}
-
-/* Dividers */
 hr {
     border-color: #343a40;
 }
-
-/* App toolbar */
-header[data-testid="stHeader"] {
-    background-color: #101214;
-}
-
 </style>
 """, unsafe_allow_html=True)
+
+
+/* Download button */
 
 # --------------------------------------------------
 # SESSION STATE
