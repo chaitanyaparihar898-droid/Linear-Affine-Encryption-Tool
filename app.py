@@ -234,11 +234,28 @@ if st.session_state["encrypted"]:
     # ENCRYPTION KEYS
     # --------------------------------------------------
 
+        # ENCRYPTION KEYS
+
     with st.expander("View Encryption Keys"):
 
-    st.caption(
-        "Each character has its own values of a and b."
-    )
+        st.caption(
+            "Each character has its own values of a and b."
+        )
+
+        key_table = []
+
+        for index, key in enumerate(st.session_state["keys"]):
+            key_table.append({
+                "Character Position": index + 1,
+                "Parameter a": key["a"],
+                "Parameter b": key["b"]
+            })
+
+        st.dataframe(
+            key_table,
+            hide_index=True,
+            use_container_width=True
+        )
 
     key_table = []
 
